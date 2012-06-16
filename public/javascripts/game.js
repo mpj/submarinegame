@@ -72,6 +72,8 @@ var update = function (modifier) {
 			reset();
 		}
 	}
+
+
 	
 	if (38 in keysDown) { // PlayerB holding up
 		playerB.y -= playerB.speed * modifier;
@@ -98,6 +100,17 @@ var update = function (modifier) {
 	}
 	if (68 in keysDown) { // Player holding D
 		playerA.x += playerA.speed * modifier;
+	}
+
+	
+	if (playerA.isPositionInvalid) {
+		playerA.x = playerA.lastValidX;
+		playerA.y = playerA.lastValidY;
+	}
+
+	if (playerB.isPositionInvalid) {
+		playerB.x = playerB.lastValidX;
+		playerB.y = playerB.lastValidY;
 	}
 
 
@@ -128,7 +141,7 @@ var update = function (modifier) {
 		var prcx = Math.floor(p.x + PROJECTILE_WIDTH  / 2);
 		var prcy = Math.floor(p.y + PROJECTILE_HEIGHT / 2);
 		
-		if (isOnDirt(ctxBg, prcx, prcy))
+		if (isOnDirt(ctxBg, p.x, p.y, PROJECTILE_WIDTH, PROJECTILE_HEIGHT))
 			exploded.push(p)
 
 		
@@ -177,11 +190,33 @@ var render = function () {
 	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.fillRect(playerB.x, playerB.y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
+	if(playerA.x && playerA.y) {
+		if (isOnDirt(ctxBg, playerA.x, playerA.y, PLAYER_WIDTH,PLAYER_HEIGHT)) {
+			playerA.isPositionInvalid = true;
+		} else {
+			playerA.isPositionInvalid = false;
+			playerA.lastValidX = playerA.x;
+			playerA.lastValidY = playerA.y;
+		}
+	}
+
+	if(playerB.x && playerB.y) {
+		if (isOnDirt(ctxBg, playerB.x, playerB.y, PLAYER_WIDTH,PLAYER_HEIGHT)) {
+			playerB.isPositionInvalid = true;
+		} else {
+			playerB.isPositionInvalid = false;
+			playerB.lastValidX = playerB.x;
+			playerB.lastValidY = playerB.y;
+		}
+	}
+
+	// Draw projectiles
 	ctx.fillStyle = "rgb(255, 0, 0)";
 	for (var i=0;i<projectiles.length;i++) {
 		var p = projectiles[i];
 		ctx.fillRect(p.x, p.y, PROJECTILE_WIDTH, PROJECTILE_HEIGHT)
 	}
+
 
 
 	// Health	
@@ -243,10 +278,17 @@ var renderBackground = function() {
 
 }
 
-var isOnDirt = function(context, x, y) {
-    var color = context.getImageData(x,y,1,1);
-    return color.data[3] === 255;
+var isDirt = function(x,y) {
+	return ctxBg.getImageData(x,y,1,1).data[3] === 255
 }
+
+var isOnDirt = function(context, x, y, w, h) {
+	return isDirt(x,y) 		|| isDirt(x+w, y ) ||
+		   isDirt(x+w,y+h)  || isDirt(x, y+h);
+	
+}
+
+
 
 var getStartPosition = function(isOnLeftSide) {
 	var randomX, randomY;
@@ -255,7 +297,7 @@ var getStartPosition = function(isOnLeftSide) {
 		randomX = Math.floor( Math.random() * STAGE_WIDTH  )
 		randomY = Math.floor( Math.random() * STAGE_HEIGHT )
 		
-		if(isOnDirt(ctxBg, randomX, randomY))
+		if(isOnDirt(ctxBg, randomX, randomY, 1, 1))
 			continue;
 
 		if (isOnLeftSide && randomX > STAGE_WIDTH / 2)
