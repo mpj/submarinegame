@@ -1,5 +1,14 @@
 // Create the canvas
+
+var bgCanvas = document.createElement("canvas");
+bgCanvas.style.position="absolute";
+var ctxBg = bgCanvas.getContext("2d");
+bgCanvas.width = 800;
+bgCanvas.height = 600;
+document.body.appendChild(bgCanvas);
+
 var canvas = document.createElement("canvas");
+canvas.style.position="absolute";
 var ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 600;
@@ -11,15 +20,26 @@ var PROJECTILE_HEIGHT = 5;
 var PLAYER_WIDTH = 20;
 var PLAYER_HEIGHT = 10;
 
+var img = new Image();
+var imgWidth = 128,
+    imgHeight = 128; 
+
+img.src = 'https://dl.dropbox.com/u/30022429/dev-null/trench.jpg';
+
+img.onload = function () {
+  backgroundReady = true;
+  
+};
+
 // Game objects
 var playerA = {
 	speed: 100, // movement in pixels per second
-	health: 10
+	health: 3
 };
 
 var playerB = {
 	speed: 100, // movement in pixels per second
-	health: 10
+	health: 3
 };
 
 var projectiles = [];
@@ -36,17 +56,12 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-// Reset the game when the player catches a monster
 var reset = function () {
 	playerA.x = 40;
 	playerA.y = 130;
 
 	playerB.x = 740;
 	playerB.y = 130;
-
-	// Throw the monster somewhere on the screen randomly
-	//monster.x = 32 + (Math.random() * (canvas.width - 64));
-	//monster.y = 32 + (Math.random() * (canvas.height - 64));
 };
 
 // Update game objects
@@ -138,10 +153,8 @@ function fireProjectile(player, direction) {
 
 // Draw everything
 var render = function () {
-	
-	// Draw water
-	ctx.fillStyle = "rgb(72, 188, 255)";
-	ctx.fillRect(0, 0, 800, 600);    
+
+	ctx.clearRect(0,0,canvas.width,canvas.height)
 
 	// Draw sub A	
 	ctx.fillStyle = "rgb(250, 250, 250)";
@@ -157,32 +170,64 @@ var render = function () {
 		ctx.fillRect(p.x, p.y, PROJECTILE_WIDTH, PROJECTILE_HEIGHT)
 	}
 
-	/*
-	if (heroReady) {
-		ctx.drawImage(heroImage, hero.x, hero.y);
-	}
 
-	if (monsterReady) {
-		ctx.drawImage(monsterImage, monster.x, monster.y);
-	}*/
-
-	// Score
-	
+	// Health	
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "35px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText(playerA.health, 32, 32);
+	ctx.fillText(playerA.health, 32, 10);
 
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "35px Helvetica";
 	ctx.textAlign = "right";
 	ctx.textBaseline = "top";
-	ctx.fillText(playerB.health, 760, 32);
+	ctx.fillText(playerB.health, 760, 10);
+    
 };
 
-// The main game loop
-var main = function () {
+var renderBackground = function() {
+
+	// Draw water
+	ctxBg.fillStyle = "rgb(72, 188, 255)";
+	ctxBg.fillRect(0, 0, 800, 600); 
+
+	ctxBg.beginPath();
+    
+    // board border      
+    ctxBg.moveTo(0,50);
+    ctxBg.lineTo(0,600);
+    ctxBg.lineTo(800,600);
+
+    // shallows      
+    ctxBg.lineTo(800,50);
+    ctxBg.quadraticCurveTo(600,50,600,100);         
+
+    // the deep
+    ctxBg.quadraticCurveTo(600,600,400,600);
+    ctxBg.quadraticCurveTo(200,600,200,100);
+
+    // shallows
+    ctxBg.quadraticCurveTo(200,50,0,50);
+    ctxBg.clip();
+      
+    var img = new Image();
+    var imgWidth = 128,
+        imgHeight = 128; 
+  
+    img.src = 'https://dl.dropbox.com/u/30022429/dev-null/trench.jpg';
+
+    img.onload = function () {
+      for (var i=0; i < Math.floor(bgCanvas.height/imgHeight) +1; i++){
+        for (var j=0; j < Math.floor(bgCanvas.width/imgWidth)+1; j++){
+          ctxBg.drawImage(img, j*imgWidth, i*imgHeight, imgWidth, imgHeight);
+        }
+      }
+    };   
+
+}
+
+var mainLoop = function () {
 	var now = Date.now();
 	var delta = now - then;
 
@@ -192,7 +237,8 @@ var main = function () {
 	then = now;
 };
 
-// Let's play this game!
+
 reset();
+renderBackground();
 var then = Date.now();
-setInterval(main, 1); // Execute as fast as possible
+setInterval(mainLoop, 1); 
