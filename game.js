@@ -15,6 +15,8 @@ var playerB = {
 	speed: 256 // movement in pixels per second
 };
 
+var projectiles = [];
+
 
 // Handle keyboard controls
 var keysDown = {};
@@ -42,6 +44,7 @@ var reset = function () {
 
 // Update game objects
 var update = function (modifier) {
+	
 	if (38 in keysDown) { // PlayerB holding up
 		playerB.y -= playerB.speed * modifier;
 	}
@@ -69,6 +72,30 @@ var update = function (modifier) {
 		playerA.x += playerA.speed * modifier;
 	}
 
+	if (32 in keysDown) { // Player holding space bar
+		projectiles.push({
+			speed: 110,
+			x: playerA.x,
+			y: playerA.y,
+			direction: 1
+		})
+	}
+
+	if (13 in keysDown) { // Player holding enter
+		projectiles.push({
+			speed: 110,
+			x: playerB.x,
+			y: playerB.y,
+			direction: -1
+		})
+	}
+
+	// draw projectiles
+	for (var i=0;i<projectiles.length;i++) {
+		var p = projectiles[i];
+		p.x += p.speed*modifier*p.direction;
+	}
+
 	// Are they touching?
 	/*
 	if (
@@ -94,8 +121,14 @@ var render = function () {
 	ctx.fillRect(playerA.x, playerA.y, 20,8)
 
 	// Draw sub B	
-	//ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.fillRect(playerB.x, playerB.y, 20,8)
+
+	ctx.fillStyle = "rgb(255, 0, 0)";
+	for (var i=0;i<projectiles.length;i++) {
+		var p = projectiles[i];
+		ctx.fillRect(p.x, p.y, 8,4)
+	}
 
 	/*
 	if (heroReady) {
