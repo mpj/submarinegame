@@ -135,8 +135,6 @@ var update = function (modifier) {
 		var prcx = Math.floor(p.x + PROJECTILE_WIDTH  / 2);
 		var prcy = Math.floor(p.y + PROJECTILE_HEIGHT / 2);
 		
-		console.log("prcx",prcx)
-		console.log("prcy",prcy)
 		if (isOnDirt(ctxBg, prcx, prcy))
 			exploded.push(p)
 
