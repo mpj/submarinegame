@@ -16,6 +16,9 @@ canvas.width = STAGE_WIDTH;
 canvas.height = STAGE_HEIGHT;
 document.body.appendChild(canvas);
 
+var backgroundReady = false;
+var initialized = false;
+
 var PROJECTILE_WIDTH = 10;
 var PROJECTILE_HEIGHT = 5;
 
@@ -26,7 +29,7 @@ var img = new Image();
 var imgWidth = 128,
     imgHeight = 128; 
 
-img.src = 'https://dl.dropbox.com/u/30022429/dev-null/trench.jpg';
+img.src = 'trench.jpg';
 
 img.onload = function () {
   backgroundReady = true;
@@ -67,8 +70,17 @@ var reset = function () {
 	playerB.y = startB.y;
 };
 
+
+
 // Update game objects
 var update = function (modifier) {
+
+	if (!initialized)  {
+		if (backgroundReady) {
+			initialized = true;
+			reset();
+		}
+	}
 	
 	if (38 in keysDown) { // PlayerB holding up
 		playerB.y -= playerB.speed * modifier;
@@ -119,8 +131,14 @@ var update = function (modifier) {
 		if (isColliding(p, playerA)) {
 			playerA.health -= 1;
 			exploded.push(p);
-
 		}
+
+		// Projectile hits dirt
+		var prcx = p.x + PROJECTILE_WIDTH  / 2;
+		var prcy = p.y + PROJECTILE_HEIGHT / 2;
+		if (isOnDirt(ctxBg, prcx, prcy))
+			exploded.push(p)
+
 		
 	}
 
@@ -195,6 +213,7 @@ var renderBackground = function() {
 	ctxBg.fillStyle = "rgb(72, 188, 255)";
 	ctxBg.fillRect(0, 0, 800, 600); 
 
+	ctxBg.fillStyle = "rgb(0, 0, 0)";
 	ctxBg.beginPath();
     
     // board border      
@@ -212,6 +231,7 @@ var renderBackground = function() {
 
     // shallows
     ctxBg.quadraticCurveTo(200,50,0,50);
+    ctxBg.fill();
     ctxBg.clip();
       
     var img = new Image();
@@ -230,25 +250,31 @@ var renderBackground = function() {
 
 }
 
+var isOnDirt = function(context, x, y) {
+    var color = context.getImageData(x,y,1,1);
+    return color.data[0] === 0;
+}
+
 var getStartPosition = function(isOnLeftSide) {
 	var randomX, randomY;
 
 	while (true) {
 		randomX = Math.floor( Math.random() * STAGE_WIDTH  )
 		randomY = Math.floor( Math.random() * STAGE_HEIGHT )
+		
+		if(isOnDirt(ctxBg, randomX, randomY))
+			continue;
+
 		if (isOnLeftSide && randomX > STAGE_WIDTH / 2)
 			continue;
 		if (!isOnLeftSide && randomX < STAGE_WIDTH / 2)
 			continue;
+		
 		return { x: randomX, y: randomY } ;
 	}
-
-	
-
-	
-
-
 }
+
+
 
 var mainLoop = function () {
 	var now = Date.now();
@@ -263,7 +289,7 @@ var mainLoop = function () {
 
 
 
-reset();
+
 renderBackground();
 var then = Date.now();
 setInterval(mainLoop, 1); 
