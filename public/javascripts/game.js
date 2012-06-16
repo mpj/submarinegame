@@ -2,26 +2,19 @@
 var STAGE_WIDTH = 800;
 var STAGE_HEIGHT = 600; 
 
-var waterCanvas = document.createElement("canvas");
-waterCanvas.style.position="absolute";
-var ctxWater = waterCanvas.getContext("2d");
-waterCanvas.width = STAGE_WIDTH;
-waterCanvas.height = STAGE_HEIGHT;
-document.body.appendChild(waterCanvas);
+var createCanvas = function() {
+	var canvas = document.createElement("canvas");
+	canvas.style.position="absolute";
+	var context = canvas.getContext("2d");
+	canvas.width = STAGE_WIDTH;
+	canvas.height = STAGE_HEIGHT;
+	document.body.appendChild(canvas);
+	return context;
+}
 
-var bgCanvas = document.createElement("canvas");
-bgCanvas.style.position="absolute";
-var ctxBg = bgCanvas.getContext("2d");
-bgCanvas.width = STAGE_WIDTH;
-bgCanvas.height = STAGE_HEIGHT;
-document.body.appendChild(bgCanvas);
-
-var canvas = document.createElement("canvas");
-canvas.style.position="absolute";
-var ctx = canvas.getContext("2d");
-canvas.width = STAGE_WIDTH;
-canvas.height = STAGE_HEIGHT;
-document.body.appendChild(canvas);
+var ctxWater = createCanvas();
+var ctxBg = createCanvas();
+var ctx = createCanvas();
 
 var backgroundReady = false;
 var initialized = false;
@@ -174,7 +167,7 @@ function fireProjectile(player, direction) {
 // Draw everything
 var render = function () {
 
-	ctx.clearRect(0,0,canvas.width,canvas.height)
+	ctx.clearRect(0,0, STAGE_WIDTH, STAGE_HEIGHT)
 
 	// Draw sub A	
 	ctx.fillStyle = "rgb(0, 0, 0)";
@@ -241,8 +234,8 @@ var renderBackground = function() {
 
     img.onload = function () {
       backgroundReady = true;
-      for (var i=0; i < Math.floor(bgCanvas.height/imgHeight) +1; i++){
-        for (var j=0; j < Math.floor(bgCanvas.width/imgWidth)+1; j++){
+      for (var i=0; i < Math.floor(STAGE_WIDTH/imgHeight) +1; i++){
+        for (var j=0; j < Math.floor(STAGE_WIDTH/imgWidth)+1; j++){
           ctxBg.drawImage(img, j*imgWidth, i*imgHeight, imgWidth, imgHeight);
         }
       }
