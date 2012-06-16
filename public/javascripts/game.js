@@ -2,6 +2,13 @@
 var STAGE_WIDTH = 800;
 var STAGE_HEIGHT = 600; 
 
+var waterCanvas = document.createElement("canvas");
+waterCanvas.style.position="absolute";
+var ctxWater = waterCanvas.getContext("2d");
+waterCanvas.width = STAGE_WIDTH;
+waterCanvas.height = STAGE_HEIGHT;
+document.body.appendChild(waterCanvas);
+
 var bgCanvas = document.createElement("canvas");
 bgCanvas.style.position="absolute";
 var ctxBg = bgCanvas.getContext("2d");
@@ -25,15 +32,6 @@ var PROJECTILE_HEIGHT = 5;
 var PLAYER_WIDTH = 20;
 var PLAYER_HEIGHT = 10;
 
-var img = new Image();
-var imgWidth = 128,
-    imgHeight = 128; 
-
-img.src = '/images/trench.jpg';
-
-img.onload = function () {
-  backgroundReady = true;
-};
 
 // Game objects
 var playerA = {
@@ -134,8 +132,11 @@ var update = function (modifier) {
 		}
 
 		// Projectile hits dirt
-		var prcx = p.x + PROJECTILE_WIDTH  / 2;
-		var prcy = p.y + PROJECTILE_HEIGHT / 2;
+		var prcx = Math.floor(p.x + PROJECTILE_WIDTH  / 2);
+		var prcy = Math.floor(p.y + PROJECTILE_HEIGHT / 2);
+		
+		console.log("prcx",prcx)
+		console.log("prcy",prcy)
 		if (isOnDirt(ctxBg, prcx, prcy))
 			exploded.push(p)
 
@@ -178,11 +179,11 @@ var render = function () {
 	ctx.clearRect(0,0,canvas.width,canvas.height)
 
 	// Draw sub A	
-	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.fillRect(playerA.x, playerA.y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
 	// Draw sub B	
-	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.fillRect(playerB.x, playerB.y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
 	ctx.fillStyle = "rgb(255, 0, 0)";
@@ -193,13 +194,13 @@ var render = function () {
 
 
 	// Health	
-	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.font = "35px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText(playerA.health, 32, 10);
 
-	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.font = "35px Helvetica";
 	ctx.textAlign = "right";
 	ctx.textBaseline = "top";
@@ -210,8 +211,8 @@ var render = function () {
 var renderBackground = function() {
 
 	// Draw water
-	ctxBg.fillStyle = "rgb(72, 188, 255)";
-	ctxBg.fillRect(0, 0, 800, 600); 
+	ctxWater.fillStyle = "rgb(72, 188, 255)";
+	ctxWater.fillRect(0, 0, 800, 600); 
 
 	ctxBg.fillStyle = "rgb(0, 0, 0)";
 	ctxBg.beginPath();
@@ -238,9 +239,10 @@ var renderBackground = function() {
     var imgWidth = 128,
         imgHeight = 128; 
   
-    img.src = 'https://dl.dropbox.com/u/30022429/dev-null/trench.jpg';
+    img.src = '/images/trench.jpg';
 
     img.onload = function () {
+      backgroundReady = true;
       for (var i=0; i < Math.floor(bgCanvas.height/imgHeight) +1; i++){
         for (var j=0; j < Math.floor(bgCanvas.width/imgWidth)+1; j++){
           ctxBg.drawImage(img, j*imgWidth, i*imgHeight, imgWidth, imgHeight);
@@ -252,7 +254,7 @@ var renderBackground = function() {
 
 var isOnDirt = function(context, x, y) {
     var color = context.getImageData(x,y,1,1);
-    return color.data[0] === 0;
+    return color.data[3] === 255;
 }
 
 var getStartPosition = function(isOnLeftSide) {
