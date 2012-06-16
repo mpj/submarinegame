@@ -1,17 +1,19 @@
 // Create the canvas
+var STAGE_WIDTH = 800;
+var STAGE_HEIGHT = 600; 
 
 var bgCanvas = document.createElement("canvas");
 bgCanvas.style.position="absolute";
 var ctxBg = bgCanvas.getContext("2d");
-bgCanvas.width = 800;
-bgCanvas.height = 600;
+bgCanvas.width = STAGE_WIDTH;
+bgCanvas.height = STAGE_HEIGHT;
 document.body.appendChild(bgCanvas);
 
 var canvas = document.createElement("canvas");
 canvas.style.position="absolute";
 var ctx = canvas.getContext("2d");
-canvas.width = 800;
-canvas.height = 600;
+canvas.width = STAGE_WIDTH;
+canvas.height = STAGE_HEIGHT;
 document.body.appendChild(canvas);
 
 var PROJECTILE_WIDTH = 10;
@@ -28,7 +30,6 @@ img.src = 'https://dl.dropbox.com/u/30022429/dev-null/trench.jpg';
 
 img.onload = function () {
   backgroundReady = true;
-  
 };
 
 // Game objects
@@ -57,11 +58,13 @@ addEventListener("keyup", function (e) {
 }, false);
 
 var reset = function () {
-	playerA.x = 40;
-	playerA.y = 130;
+	var startA = getStartPosition(true);
+	playerA.x = startA.x;
+	playerA.y = startA.y;
 
-	playerB.x = 740;
-	playerB.y = 130;
+	var startB = getStartPosition(false);
+	playerB.x = startB.x;
+	playerB.y = startB.y;
 };
 
 // Update game objects
@@ -227,6 +230,26 @@ var renderBackground = function() {
 
 }
 
+var getStartPosition = function(isOnLeftSide) {
+	var randomX, randomY;
+
+	while (true) {
+		randomX = Math.floor( Math.random() * STAGE_WIDTH  )
+		randomY = Math.floor( Math.random() * STAGE_HEIGHT )
+		if (isOnLeftSide && randomX > STAGE_WIDTH / 2)
+			continue;
+		if (!isOnLeftSide && randomX < STAGE_WIDTH / 2)
+			continue;
+		return { x: randomX, y: randomY } ;
+	}
+
+	
+
+	
+
+
+}
+
 var mainLoop = function () {
 	var now = Date.now();
 	var delta = now - then;
@@ -236,6 +259,8 @@ var mainLoop = function () {
 
 	then = now;
 };
+
+
 
 
 reset();
