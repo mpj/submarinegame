@@ -72,22 +72,13 @@ var update = function (modifier) {
 		playerA.x += playerA.speed * modifier;
 	}
 
+
 	if (32 in keysDown) { // Player holding space bar
-		projectiles.push({
-			speed: 110,
-			x: playerA.x,
-			y: playerA.y,
-			direction: 1
-		})
+		fireProjectile(playerA, 1)
 	}
 
 	if (13 in keysDown) { // Player holding enter
-		projectiles.push({
-			speed: 110,
-			x: playerB.x,
-			y: playerB.y,
-			direction: -1
-		})
+		fireProjectile(playerB, -1)
 	}
 
 	// draw projectiles
@@ -108,6 +99,19 @@ var update = function (modifier) {
 		reset();
 	}*/
 };
+
+function fireProjectile(player, direction) {
+	if (!player.lastFired || player.lastFired < Date.now() - 500) {
+		player.lastFired = Date.now();
+
+		projectiles.push({
+			speed: 110,
+			x: player.x,
+			y: player.y,
+			direction: direction
+		})	
+	}
+}
 
 // Draw everything
 var render = function () {
