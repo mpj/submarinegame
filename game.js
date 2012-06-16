@@ -5,14 +5,21 @@ canvas.width = 800;
 canvas.height = 600;
 document.body.appendChild(canvas);
 
+var PROJECTILE_WIDTH = 10;
+var PROJECTILE_HEIGHT = 5;
+
+var PLAYER_WIDTH = 20;
+var PLAYER_HEIGHT = 10;
 
 // Game objects
 var playerA = {
-	speed: 256 // movement in pixels per second
+	speed: 100, // movement in pixels per second
+	health: 10
 };
 
 var playerB = {
-	speed: 256 // movement in pixels per second
+	speed: 100, // movement in pixels per second
+	health: 10
 };
 
 var projectiles = [];
@@ -31,11 +38,11 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a monster
 var reset = function () {
-	playerA.x = 10;
-	playerA.y = 20;
+	playerA.x = 40;
+	playerA.y = 130;
 
-	playerB.x = 770;
-	playerB.y = 20;
+	playerB.x = 740;
+	playerB.y = 130;
 
 	// Throw the monster somewhere on the screen randomly
 	//monster.x = 32 + (Math.random() * (canvas.width - 64));
@@ -81,32 +88,48 @@ var update = function (modifier) {
 		fireProjectile(playerB, -1)
 	}
 
-	// draw projectiles
+	// update projectile position
+	var exploded = []
 	for (var i=0;i<projectiles.length;i++) {
 		var p = projectiles[i];
 		p.x += p.speed*modifier*p.direction;
+
+		if (isColliding(p, playerB)) {
+			playerB.health -= 1;
+			exploded.push(p);
+		}
+		if (isColliding(p, playerA)) {
+			playerA.health -= 1;
+			exploded.push(p);
+
+		}
+		
 	}
 
-	// Are they touching?
-	/*
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-		++monstersCaught;
-		reset();
-	}*/
+	for (i=0;i<exploded.length;i++) {
+		var index = projectiles.indexOf(exploded[i]);
+		projectiles.splice(index, 1)
+	}
+
+
+
 };
 
+function isColliding(projectile, player) {
+	var prcx = projectile.x + PROJECTILE_WIDTH  / 2;
+	var prcy = projectile.y + PROJECTILE_HEIGHT / 2;
+	return prcx > player.x && prcx < player.x + PLAYER_WIDTH && 
+	   	   prcy > player.y && prcy < player.y + PLAYER_HEIGHT
+}
+
 function fireProjectile(player, direction) {
-	if (!player.lastFired || player.lastFired < Date.now() - 500) {
+	var limit = 750;
+	if (!player.lastFired || player.lastFired < Date.now() - limit) {
 		player.lastFired = Date.now();
 
 		projectiles.push({
 			speed: 110,
-			x: player.x,
+			x: player.x + ((PLAYER_WIDTH)*direction) ,
 			y: player.y,
 			direction: direction
 		})	
@@ -122,16 +145,16 @@ var render = function () {
 
 	// Draw sub A	
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.fillRect(playerA.x, playerA.y, 20,8)
+	ctx.fillRect(playerA.x, playerA.y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
 	// Draw sub B	
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.fillRect(playerB.x, playerB.y, 20,8)
+	ctx.fillRect(playerB.x, playerB.y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
 	ctx.fillStyle = "rgb(255, 0, 0)";
 	for (var i=0;i<projectiles.length;i++) {
 		var p = projectiles[i];
-		ctx.fillRect(p.x, p.y, 8,4)
+		ctx.fillRect(p.x, p.y, PROJECTILE_WIDTH, PROJECTILE_HEIGHT)
 	}
 
 	/*
@@ -144,12 +167,18 @@ var render = function () {
 	}*/
 
 	// Score
-	/*
+	
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
+	ctx.font = "35px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Goblins caught: ", 32, 32);*/
+	ctx.fillText(playerA.health, 32, 32);
+
+	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.font = "35px Helvetica";
+	ctx.textAlign = "right";
+	ctx.textBaseline = "top";
+	ctx.fillText(playerB.health, 760, 32);
 };
 
 // The main game loop
